@@ -28,10 +28,10 @@ def parse_args():
     parser.add_argument('--options', type=list, default=["A", "B", "C", "D", "E"])
     parser.add_argument('--epoch', type=int, default=20)
     parser.add_argument('--lr', type=float, default=5e-5)
-    parser.add_argument('--bs', type=int, default=16)
+    parser.add_argument('--bs', type=int, default=16, help="training batch size")
     parser.add_argument('--input_len', type=int, default=512)
     parser.add_argument('--output_len', type=int, default=64)
-    parser.add_argument('--eval_bs', type=int, default=16)
+    parser.add_argument('--eval_bs', type=int, default=16, "evaluation batch size")
     parser.add_argument('--eval_acc', type=int, default=None, help='evaluate accumulation step')
     parser.add_argument('--train_split', type=str, default='train', choices=['train', 'trainval', 'minitrain'])
     parser.add_argument('--val_split', type=str, default='val', choices=['test', 'val', 'minival'])
@@ -272,7 +272,7 @@ def T5Trainer(
     metrics = trainer.evaluate(eval_dataset = test_set)
     trainer.log_metrics("test", metrics)
     trainer.save_metrics("test", metrics)
-
+    import pdb; pdb.set_trace()
     predict_results = trainer.predict(test_dataset=test_set, max_length=args.output_len) 
     if trainer.is_world_process_zero():
         if args.use_generate:
