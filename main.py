@@ -4,6 +4,7 @@ import torch
 import os
 import re
 import json
+import pdb
 import argparse
 import random
 from transformers import T5Tokenizer, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer, T5ForConditionalGeneration
@@ -272,12 +273,14 @@ def T5Trainer(
     if args.evaluate_dir is None:
         trainer.train()
         trainer.save_model(save_dir)
-        
+    print('before evaluate...')
+    pdb.set_trace()
     metrics = trainer.evaluate(eval_dataset = test_set)
+    print('after evaluate...')
     trainer.log_metrics("test", metrics)
     trainer.save_metrics("test", metrics)
     print('Before debugger.....')
-    import pdb; pdb.set_trace()
+    pdb.set_trace()
     print('Before debugger.....')
     predict_results = trainer.predict(test_dataset=test_set, max_length=args.output_len) 
     if trainer.is_world_process_zero():
