@@ -21,6 +21,7 @@ import evaluate
 
 
 def parse_args():
+    print(f'Inside parse_args......')
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_root', type=str, default='data')
     parser.add_argument('--output_dir', type=str, default='experiments')
@@ -56,6 +57,7 @@ def parse_args():
 def T5Trainer(
     dataframe, args,
 ):
+    print('Inside T5 trainer...')
     torch.manual_seed(args.seed)  # pytorch random seed
     np.random.seed(args.seed)  # numpy random seed
     torch.backends.cudnn.deterministic = True
@@ -63,7 +65,9 @@ def T5Trainer(
     if args.evaluate_dir is not None:
         args.model = args.evaluate_dir
 
+    print('Initializing T5Tokenizer.....')
     tokenizer = T5Tokenizer.from_pretrained(args.model)
+    print('T5Tokenizer initialized.....')
 
     console.log(f"""[Model]: Loading {args.model}...\n""")
     console.log(f"[Data]: Reading data...\n")
