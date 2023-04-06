@@ -73,6 +73,7 @@ class ScienceQADatasetStd(Dataset):
     def __init__(
         self, problems, qids, tokenizer, source_len, target_len, args, test_le=None
     ):
+        print('In ScienceQADatasetStd::__init__')
         self.tokenizer = tokenizer
         self.data = {qid : problems[qid] for qid in qids}
         self.source_len = source_len
@@ -95,9 +96,11 @@ class ScienceQADatasetStd(Dataset):
             self.source_text.append(prompt)
 
     def __len__(self):
+        print('ScienceQADatasetStd::__len__')
         return len(self.target_text)
 
     def __getitem__(self, index):
+        print('ScienceQADatasetStd::__getitem__')
         source_text = str(self.source_text[index])
         target_text = str(self.target_text[index])
 
@@ -143,6 +146,7 @@ class ScienceQADatasetImg(Dataset):
     def __init__(
         self, problems, qids, name_maps, tokenizer, source_len, target_len, args, image_features, test_le=None
     ):
+        print('In ScienceQADatasetImg::__init__')
         """
         Initializes a Dataset class
 
@@ -183,11 +187,13 @@ class ScienceQADatasetImg(Dataset):
                 self.image_ids.append(np.zeros(shape))
     
     def __len__(self):
+        print('In ScienceQADatasetImg::__len__')
         """returns the length of dataframe"""
 
         return len(self.target_text)
 
     def __getitem__(self, index):
+        print('In ScienceQADatasetImg::__getitem__')
         """return the input ids, attention masks and target ids"""
 
         source_text = str(self.source_text[index])
