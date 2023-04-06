@@ -28,6 +28,7 @@ class T5ForMultimodalGeneration(T5ForConditionalGeneration):
     ]
 
     def __init__(self, config: T5Config, patch_size, padding_idx, save_dir):
+        print('In T5ForMultimodalGeneration::init>>>')
         super().__init__(config)
         self.model_dim = config.d_model
         
@@ -83,6 +84,7 @@ class T5ForMultimodalGeneration(T5ForConditionalGeneration):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple[torch.FloatTensor], Seq2SeqLMOutput]:
+        print('In T5ForMultimodalGeneration::forward>>>')
         use_cache = use_cache if use_cache is not None else self.config.use_cache
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 

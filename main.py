@@ -158,6 +158,7 @@ def T5Trainer(
     datacollator = DataCollatorForSeq2Seq(tokenizer)
     print("model parameters: ", model.num_parameters())
     def extract_ans(ans):
+        print('Inside extract_ans>>>')
         pattern = re.compile(r'The answer is \(([A-Z])\)')
         res = pattern.findall(ans)
         
@@ -169,6 +170,7 @@ def T5Trainer(
 
     # accuracy for answer inference
     def compute_metrics_acc(eval_preds):
+        print('Inside compute_metrics_acc>>>')
         if args.use_generate:
             preds, targets = eval_preds
             if isinstance(preds, tuple):
@@ -193,6 +195,7 @@ def T5Trainer(
     # rougel for rationale generation
     metric = evaluate.load("rouge")
     def postprocess_text(preds, labels):
+        print('Inside postprocess_text>>>')
         preds = [pred.strip() for pred in preds]
         labels = [label.strip() for label in labels]
         preds = ["\n".join(nltk.sent_tokenize(pred)) for pred in preds]
@@ -200,6 +203,7 @@ def T5Trainer(
         return preds, labels
 
     def compute_metrics_rougel(eval_preds):
+        print('Inside compute_metrics_rougel>>>')
         if args.use_generate:
             preds, targets = eval_preds
             if isinstance(preds, tuple):
