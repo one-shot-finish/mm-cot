@@ -390,6 +390,9 @@ if __name__ == '__main__':
         problems, qids = load_data_std(args)  # probelms, test question ids, shot example ids
         dataframe = {'problems':problems, 'qids':qids}
 
+    print('Before debugger in __main__.....')
+    pdb.set_trace()
+    print('Before debugger in __main__.....')
     T5Trainer(
         dataframe=dataframe,
         args = args
