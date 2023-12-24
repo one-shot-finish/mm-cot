@@ -7,8 +7,8 @@ import json
 import pdb
 import argparse
 import random
-from transformers import T5Tokenizer, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer, T5ForConditionalGeneration
-from model import T5ForConditionalGeneration, T5ForMultimodalGeneration
+from transformers import AutoTokenizer, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer, T5ForConditionalGeneration
+from model import T5ForMultimodalGeneration
 from utils_data import img_shape, load_data_std, load_data_img, ScienceQADatasetStd, ScienceQADatasetImg
 from utils_prompt import *
 from utils_evaluate import get_scores
@@ -16,10 +16,8 @@ from rich.table import Column, Table
 from rich import box
 from rich.console import Console
 console = Console(record=True)
-from torch import cuda
 import nltk
 import evaluate
-
 
 def parse_args():
     print(f'Inside parse_args......')
@@ -42,14 +40,14 @@ def parse_args():
     parser.add_argument('--use_generate', action='store_true', help='only for baseline to improve inference speed')
     parser.add_argument('--final_eval', action='store_true', help='only evaluate the model at the final epoch')
     parser.add_argument('--user_msg', type=str, default="baseline", help='experiment type in the save_dir')
-    parser.add_argument('--img_type', type=str, default=None, choices=['detr', 'clip', 'resnet'], help='type of image features')
+    parser.add_argument('--img_type', type=str, default=None, choices=['detr', 'clip', 'resnet','vit'], help='type of image features')
     parser.add_argument('--eval_le', type=str, default=None, help='generated rationale for the dev set')
     parser.add_argument('--test_le', type=str, default=None, help='generated rationale for the test set')
     parser.add_argument('--evaluate_dir', type=str, default=None, help='the directory of model for evaluation')
     parser.add_argument('--caption_file', type=str, default='data/captions.json')
     parser.add_argument('--use_caption', action='store_true', help='use image captions or not')
     parser.add_argument('--prompt_format', type=str, default='QCM-A', help='prompt format template',
-                        choices=['QCM-A', 'QCM-LE', 'QCMG-A', 'QCM-LEA', 'QCM-ALE'])
+                        choices=['QCM-A', 'QCM-E', 'QCM-LE', 'QCMG-A', 'QCM-LEA', 'QCM-ALE'])
     parser.add_argument('--seed', type=int, default=42, help='random seed')
 
     args = parser.parse_args()
@@ -67,7 +65,7 @@ def T5Trainer(
         args.model = args.evaluate_dir
 
     print('Initializing T5Tokenizer.....')
-    tokenizer = T5Tokenizer.from_pretrained(args.model)
+    tokenizer = AutoTokenizer.from_pretrained(args.model)
     print('T5Tokenizer initialized.....')
 
     # console.log(f"""[Model]: Loading {args.model}...\n""")
@@ -86,11 +84,11 @@ def T5Trainer(
         save_dir = f"{args.output_dir}/{args.user_msg}_{model_name}_{args.img_type}_{args.prompt_format}_lr{args.lr}_bs{args.bs * gpu_count}_op{args.output_len}_ep{args.epoch}"
         if not os.path.exists(save_dir):
             os.mkdir(save_dir)
+    print(save_dir)
 
-    padding_idx = tokenizer._convert_token_to_id(tokenizer.pad_token)
     if args.img_type is not None:
         patch_size = img_shape[args.img_type]
-        model = T5ForMultimodalGeneration.from_pretrained(args.model, patch_size=patch_size, padding_idx=padding_idx, save_dir=save_dir) 
+        model = T5ForMultimodalGeneration.from_pretrained(args.model, patch_size=patch_size) 
         name_maps = dataframe['name_maps'] 
         image_features = dataframe['image_features']
         train_set = ScienceQADatasetImg(
@@ -240,6 +238,7 @@ def T5Trainer(
             weight_decay=0.01,
             num_train_epochs=args.epoch,
             predict_with_generate=args.use_generate,
+            generation_max_length=args.output_len,
             report_to="none",
         )
     # evaluate at each epoch
@@ -258,8 +257,9 @@ def T5Trainer(
             per_device_eval_batch_size=args.eval_bs,
             weight_decay=0.01,
             num_train_epochs=args.epoch,
-            metric_for_best_model="accuracy" if args.prompt_format != "QCM-LE" else "rougeL",
+            metric_for_best_model="accuracy" if args.prompt_format == "QCMG-A" or args.prompt_format == "QCM-A" else "rougeL",
             predict_with_generate=args.use_generate,
+            generation_max_length=args.output_len,
             load_best_model_at_end=True,
             report_to="none",
         )
@@ -271,7 +271,7 @@ def T5Trainer(
         eval_dataset=eval_set,
         data_collator=datacollator,
         tokenizer=tokenizer,
-        compute_metrics = compute_metrics_acc if args.prompt_format != "QCM-LE" else compute_metrics_rougel
+        compute_metrics = compute_metrics_acc if args.prompt_format == "QCMG-A" or args.prompt_format == "QCM-A" else compute_metrics_rougel
     )
 
     if args.evaluate_dir is None:
@@ -279,7 +279,7 @@ def T5Trainer(
         trainer.save_model(save_dir)
     print('before evaluate...')
     pdb.set_trace()
-    metrics = trainer.evaluate(eval_dataset = test_set)
+    metrics = trainer.evaluate(eval_dataset = test_set, max_length=args.output_len)
     print('after evaluate...')
     trainer.log_metrics("test", metrics)
     trainer.save_metrics("test", metrics)
@@ -335,7 +335,7 @@ def T5Trainer(
             writer.write(json.dumps(output_data, indent=4))
     
     # generate the rationale for the eval set
-    if args.prompt_format == "QCM-LE":
+    if args.prompt_format == "QCM-LE" or args.prompt_format == "QCM-E":
         torch.cuda.empty_cache()
         del predict_results, preds, targets
         predict_results = trainer.predict(test_dataset=eval_set, max_length=args.output_len) 
