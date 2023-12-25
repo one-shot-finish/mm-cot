@@ -285,7 +285,7 @@ def T5Trainer(
     trainer.save_metrics("test", metrics)
     print('Before debugger.....')
     pdb.set_trace()
-    print('Before debugger.....')
+    print('After debugger.....')
     predict_results = trainer.predict(test_dataset=test_set, max_length=args.output_len) 
     if trainer.is_world_process_zero():
         if args.use_generate:
@@ -392,7 +392,7 @@ if __name__ == '__main__':
 
     print('Before debugger in __main__.....')
     pdb.set_trace()
-    print('Before debugger in __main__.....')
+    print('After debugger in __main__.....')
     T5Trainer(
         dataframe=dataframe,
         args = args
