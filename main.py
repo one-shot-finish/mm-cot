@@ -89,6 +89,7 @@ def T5Trainer(
     if args.img_type is not None:
         patch_size = img_shape[args.img_type]
         model = T5ForMultimodalGeneration.from_pretrained(args.model, patch_size=patch_size) 
+        print('after initializing T5ForMultimodalGeneration model>>>>>>>>>>>>')
         name_maps = dataframe['name_maps'] 
         image_features = dataframe['image_features']
         train_set = ScienceQADatasetImg(
@@ -153,6 +154,7 @@ def T5Trainer(
             args.test_le,
         )
 
+    print('before DataCollatorForSeq2Seq>>>>>>>>')
     datacollator = DataCollatorForSeq2Seq(tokenizer)
     print("model parameters: ", model.num_parameters())
     def extract_ans(ans):

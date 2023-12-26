@@ -348,7 +348,9 @@ class T5ForMultimodalGeneration(T5ForConditionalGeneration):
         self.lm_head = nn.Linear(config.d_model, config.vocab_size, bias=False)
 
         # Initialize weights and apply final processing
+        print('Before post_init in T5ForMultimodalGeneration>>>>>>>>>')
         self.post_init()
+        print('After post_init in T5ForMultimodalGeneration>>>>>>>>>>')
 
         # Model parallel
         self.model_parallel = False
