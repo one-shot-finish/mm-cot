@@ -328,6 +328,7 @@ class T5ForMultimodalGeneration(T5ForConditionalGeneration):
     def __init__(self, config: T5Config, patch_size):
         print('In T5ForMultimodalGeneration::init>>>')
         super().__init__(config)
+        print('After superinit>>>>>>>>>>> in T5ForMultimodalGeneration')
         self.model_dim = config.d_model
 
         self.shared = nn.Embedding(config.vocab_size, config.d_model)
