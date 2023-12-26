@@ -23,14 +23,18 @@ from torch.utils.checkpoint import checkpoint
 
 class JointEncoder(T5Stack):
     def __init__(self, config, embed_tokens=None, patch_size=None):
+        print('In JointEncoder>>>>>>>>>>>>>')
         super().__init__(config)
+        print('after super().__init__ in JointEncoder>>>>>>>>>')
 
         self.embed_tokens = embed_tokens
         self.is_decoder = config.is_decoder
 
         self.patch_num, self.patch_dim = patch_size
         self.image_dense = nn.Linear(self.patch_dim, config.d_model)
+        print('before MHA in JointEncoder>>>>>>>>>')
         self.mha_layer = torch.nn.MultiheadAttention(embed_dim=config.hidden_size, kdim=config.hidden_size, vdim=config.hidden_size, num_heads=1, batch_first=True)
+        print('after MHA in JointEncoder>>>>>>>>>>')
         self.gate_dense = nn.Linear(2*config.hidden_size, config.hidden_size)
         self.sigmoid = nn.Sigmoid()
 
@@ -41,7 +45,9 @@ class JointEncoder(T5Stack):
         self.dropout = nn.Dropout(config.dropout_rate)
 
         # Initialize weights and apply final processing
+        print('before post_init() in JointEncoder>>>>>>>>>>')
         self.post_init()
+        print('after post_init() in JointEncoder>>>>>>>>>')
         # Model parallel
         self.model_parallel = False
         self.device_map = None
