@@ -39,7 +39,7 @@ class JointEncoder(T5Stack):
         print('after gate_dense in JointEncoder>>>>>>>>>')
         self.sigmoid = nn.Sigmoid()
         print('after sigmoid in JointEncoder>>>>>>>>>>>>>')
-
+        print('JointEncoder config>>>>>>>>>>>', config, '>>>>>>>>>>')
         self.block = nn.ModuleList(
             [T5Block(config, has_relative_attention_bias=bool(i == 0)) for i in range(config.num_layers)]
         )
