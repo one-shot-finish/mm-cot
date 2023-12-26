@@ -36,13 +36,18 @@ class JointEncoder(T5Stack):
         self.mha_layer = torch.nn.MultiheadAttention(embed_dim=config.hidden_size, kdim=config.hidden_size, vdim=config.hidden_size, num_heads=1, batch_first=True)
         print('after MHA in JointEncoder>>>>>>>>>>')
         self.gate_dense = nn.Linear(2*config.hidden_size, config.hidden_size)
+        print('after gate_dense in JointEncoder>>>>>>>>>')
         self.sigmoid = nn.Sigmoid()
+        print('after sigmoid in JointEncoder>>>>>>>>>>>>>')
 
         self.block = nn.ModuleList(
             [T5Block(config, has_relative_attention_bias=bool(i == 0)) for i in range(config.num_layers)]
         )
+        print('after ModuleList in JointEncoder>>>>>>>')
         self.final_layer_norm = T5LayerNorm(config.d_model, eps=config.layer_norm_epsilon)
+        print('after T5LayerNorm in JointEncoder>>>>>>>')
         self.dropout = nn.Dropout(config.dropout_rate)
+        print('after dropout in JointEncoder>>>>>>>>>>')
 
         # Initialize weights and apply final processing
         print('before post_init() in JointEncoder>>>>>>>>>>')
