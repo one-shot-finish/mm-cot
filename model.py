@@ -23,36 +23,36 @@ from torch.utils.checkpoint import checkpoint
 
 class JointEncoder(T5Stack):
     def __init__(self, config, embed_tokens=None, patch_size=None):
-        print('In JointEncoder>>>>>>>>>>>>>')
+        # print('In JointEncoder>>>>>>>>>>>>>')
         super().__init__(config)
-        print('after super().__init__ in JointEncoder>>>>>>>>>')
+        # print('after super().__init__ in JointEncoder>>>>>>>>>')
 
         self.embed_tokens = embed_tokens
         self.is_decoder = config.is_decoder
 
         self.patch_num, self.patch_dim = patch_size
         self.image_dense = nn.Linear(self.patch_dim, config.d_model)
-        print('before MHA in JointEncoder>>>>>>>>>')
+        # print('before MHA in JointEncoder>>>>>>>>>')
         self.mha_layer = torch.nn.MultiheadAttention(embed_dim=config.hidden_size, kdim=config.hidden_size, vdim=config.hidden_size, num_heads=1, batch_first=True)
-        print('after MHA in JointEncoder>>>>>>>>>>')
+        # print('after MHA in JointEncoder>>>>>>>>>>')
         self.gate_dense = nn.Linear(2*config.hidden_size, config.hidden_size)
-        print('after gate_dense in JointEncoder>>>>>>>>>')
+        # print('after gate_dense in JointEncoder>>>>>>>>>')
         self.sigmoid = nn.Sigmoid()
-        print('after sigmoid in JointEncoder>>>>>>>>>>>>>')
-        print('JointEncoder config>>>>>>>>>>>', config, '>>>>>>>>>>')
+        # print('after sigmoid in JointEncoder>>>>>>>>>>>>>')
+        # print('JointEncoder config>>>>>>>>>>>', config, '>>>>>>>>>>')
         self.block = nn.ModuleList(
             [T5Block(config, has_relative_attention_bias=bool(i == 0)) for i in range(config.num_layers)]
         )
-        print('after ModuleList in JointEncoder>>>>>>>')
+        # print('after ModuleList in JointEncoder>>>>>>>')
         self.final_layer_norm = T5LayerNorm(config.d_model, eps=config.layer_norm_epsilon)
-        print('after T5LayerNorm in JointEncoder>>>>>>>')
+        # print('after T5LayerNorm in JointEncoder>>>>>>>')
         self.dropout = nn.Dropout(config.dropout_rate)
-        print('after dropout in JointEncoder>>>>>>>>>>')
+        # print('after dropout in JointEncoder>>>>>>>>>>')
 
         # Initialize weights and apply final processing
-        print('before post_init() in JointEncoder>>>>>>>>>>')
+        # print('before post_init() in JointEncoder>>>>>>>>>>')
         self.post_init()
-        print('after post_init() in JointEncoder>>>>>>>>>')
+        # print('after post_init() in JointEncoder>>>>>>>>>')
         # Model parallel
         self.model_parallel = False
         self.device_map = None
@@ -337,9 +337,9 @@ class T5ForMultimodalGeneration(T5ForConditionalGeneration):
     ]
 
     def __init__(self, config: T5Config, patch_size):
-        print('In T5ForMultimodalGeneration::init>>>')
+        # print('In T5ForMultimodalGeneration::init>>>')
         super().__init__(config)
-        print('After superinit>>>>>>>>>>> in T5ForMultimodalGeneration')
+        # print('After superinit>>>>>>>>>>> in T5ForMultimodalGeneration')
         self.model_dim = config.d_model
 
         self.shared = nn.Embedding(config.vocab_size, config.d_model)
@@ -349,9 +349,9 @@ class T5ForMultimodalGeneration(T5ForConditionalGeneration):
         encoder_config.use_cache = False
         encoder_config.is_encoder_decoder = False
         # self.encoder = T5Stack(encoder_config, self.shared)
-        print('before JointEncoder in T5ForConditionalGeneration>>>>>>>>>>')
+        # print('before JointEncoder in T5ForConditionalGeneration>>>>>>>>>>')
         self.encoder = JointEncoder(encoder_config, self.shared, patch_size)
-        print('after JointEncoder in T5ForConditionalGeneration>>>>>>>>>>')
+        # print('after JointEncoder in T5ForConditionalGeneration>>>>>>>>>>')
         decoder_config = copy.deepcopy(config)
         decoder_config.is_decoder = True
         decoder_config.is_encoder_decoder = False
@@ -361,9 +361,9 @@ class T5ForMultimodalGeneration(T5ForConditionalGeneration):
         self.lm_head = nn.Linear(config.d_model, config.vocab_size, bias=False)
 
         # Initialize weights and apply final processing
-        print('Before post_init in T5ForMultimodalGeneration>>>>>>>>>')
+        # print('Before post_init in T5ForMultimodalGeneration>>>>>>>>>')
         self.post_init()
-        print('After post_init in T5ForMultimodalGeneration>>>>>>>>>>')
+        # print('After post_init in T5ForMultimodalGeneration>>>>>>>>>>')
 
         # Model parallel
         self.model_parallel = False
@@ -389,7 +389,7 @@ class T5ForMultimodalGeneration(T5ForConditionalGeneration):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple[torch.FloatTensor], Seq2SeqLMOutput]:
-        print('In T5ForMultimodalGeneration::forward>>>')
+        # print('In T5ForMultimodalGeneration::forward>>>')
         use_cache = use_cache if use_cache is not None else self.config.use_cache
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
