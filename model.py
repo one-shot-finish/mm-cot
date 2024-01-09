@@ -348,7 +348,7 @@ class T5ForMultimodalGeneration(T5ForConditionalGeneration):
         encoder_config.is_decoder = False
         encoder_config.use_cache = False
         encoder_config.is_encoder_decoder = False
-        self.encoder = T5Stack(encoder_config, self.shared)
+        # self.encoder = T5Stack(encoder_config, self.shared)
         # print('before JointEncoder in T5ForConditionalGeneration>>>>>>>>>>')
         self.encoder = JointEncoder(encoder_config, self.shared, patch_size)
         # print('after JointEncoder in T5ForConditionalGeneration>>>>>>>>>>')

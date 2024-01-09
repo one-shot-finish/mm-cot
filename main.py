@@ -89,6 +89,7 @@ def T5Trainer(
     if args.img_type is not None:
         patch_size = img_shape[args.img_type]
         model = T5ForMultimodalGeneration.from_pretrained(args.model, patch_size=patch_size)
+        model.config.pad_token_id = tokenizer.eos_token_id
         print('after initializing T5ForMultimodalGeneration model>>>>>>>>>>>>')
         name_maps = dataframe['name_maps'] 
         image_features = dataframe['image_features']
