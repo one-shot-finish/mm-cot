@@ -11,6 +11,7 @@ import math
 import os
 import warnings
 from typing import Optional, Tuple, Union
+import numpy as np
 import torch
 from torch import nn
 from torch.nn import CrossEntropyLoss
@@ -525,7 +526,9 @@ class T5ForMultimodalGeneration(T5ForConditionalGeneration):
             **kwargs
         )
 
+        output = np.where(output != -100, output, tokenizer.pad_token_id)
         generated_sents = tokenizer.batch_decode(output, skip_special_tokens=True)
+        batch['labels'] = np.where(batch['labels'] != -100, batch['labels'], tokenizer.pad_token_id)
         targets = tokenizer.batch_decode(batch['labels'], skip_special_tokens=True)
 
         result = {}

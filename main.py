@@ -179,7 +179,9 @@ def T5Trainer(
             preds = eval_preds.predictions[0]
             targets = eval_preds.label_ids
             preds = preds.argmax(axis=2)
+        preds = np.where(preds != -100, preds, tokenizer.pad_token_id)
         preds = tokenizer.batch_decode(preds, skip_special_tokens=True, clean_up_tokenization_spaces=True)
+        targets = np.where(targets != -100, targets, tokenizer.pad_token_id)
         targets = tokenizer.batch_decode(targets, skip_special_tokens=True, clean_up_tokenization_spaces=True)
         correct = 0
         assert len(preds) == len(targets)
@@ -214,6 +216,7 @@ def T5Trainer(
             preds = preds.argmax(axis=2)
         preds = np.where(preds != -100, preds, tokenizer.pad_token_id)
         preds = tokenizer.batch_decode(preds, skip_special_tokens=True, clean_up_tokenization_spaces=True)
+        targets = np.where(targets != -100, targets, tokenizer.pad_token_id)
         targets = tokenizer.batch_decode(targets, skip_special_tokens=True, clean_up_tokenization_spaces=True)
 
         decoded_preds, decoded_labels = postprocess_text(preds, targets)
@@ -298,9 +301,11 @@ def T5Trainer(
             targets = predict_results.label_ids
             preds = preds.argmax(axis=2)
 
+        preds = np.where(preds != -100, preds, tokenizer.pad_token_id)
         preds = tokenizer.batch_decode(
             preds, skip_special_tokens=True, clean_up_tokenization_spaces=True
         )
+        targets = np.where(targets != -100, targets, tokenizer.pad_token_id)
         targets = tokenizer.batch_decode(
             targets, skip_special_tokens=True, clean_up_tokenization_spaces=True
         )
@@ -350,9 +355,11 @@ def T5Trainer(
                 targets = predict_results.label_ids
                 preds = preds.argmax(axis=2)
 
+            preds = np.where(preds != -100, preds, tokenizer.pad_token_id)
             preds = tokenizer.batch_decode(
                 preds, skip_special_tokens=True, clean_up_tokenization_spaces=True
             )
+            targets = np.where(targets != -100, targets, tokenizer.pad_token_id)
             targets = tokenizer.batch_decode(
                 targets, skip_special_tokens=True, clean_up_tokenization_spaces=True
             )
