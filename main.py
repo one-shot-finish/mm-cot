@@ -56,7 +56,6 @@ def parse_args():
 def T5Trainer(
     dataframe, args,
 ):
-    # print('Inside T5 trainer...')
     torch.manual_seed(args.seed)  # pytorch random seed
     np.random.seed(args.seed)  # numpy random seed
     torch.backends.cudnn.deterministic = True
@@ -64,9 +63,7 @@ def T5Trainer(
     if args.evaluate_dir is not None:
         args.model = args.evaluate_dir
 
-    # print('Initializing T5Tokenizer.....')
     tokenizer = AutoTokenizer.from_pretrained(args.model)
-    # print('T5Tokenizer initialized.....')
 
     # console.log(f"""[Model]: Loading {args.model}...\n""")
     # console.log(f"[Data]: Reading data...\n")
@@ -154,11 +151,9 @@ def T5Trainer(
             args.test_le,
         )
 
-    # print('before DataCollatorForSeq2Seq>>>>>>>>')
     datacollator = DataCollatorForSeq2Seq(tokenizer)
     # print("model parameters: ", model.num_parameters())
     def extract_ans(ans):
-        print('Inside extract_ans>>>')
         pattern = re.compile(r'The answer is \(([A-Z])\)')
         res = pattern.findall(ans)
         
@@ -170,7 +165,6 @@ def T5Trainer(
 
     # accuracy for answer inference
     def compute_metrics_acc(eval_preds):
-        # print('Inside compute_metrics_acc>>>')
         if args.use_generate:
             preds, targets = eval_preds
             if isinstance(preds, tuple):
@@ -197,7 +191,6 @@ def T5Trainer(
     # rougel for rationale generation
     metric = evaluate.load("rouge")
     def postprocess_text(preds, labels):
-        # print('Inside postprocess_text>>>')
         preds = [pred.strip() for pred in preds]
         labels = [label.strip() for label in labels]
         preds = ["\n".join(nltk.sent_tokenize(pred)) for pred in preds]
@@ -205,7 +198,6 @@ def T5Trainer(
         return preds, labels
 
     def compute_metrics_rougel(eval_preds):
-        # print('Inside compute_metrics_rougel>>>')
         if args.use_generate:
             preds, targets = eval_preds
             if isinstance(preds, tuple):
@@ -283,15 +275,9 @@ def T5Trainer(
     if args.evaluate_dir is None:
         trainer.train()
         trainer.save_model(save_dir)
-    # print('before evaluate...')
-    # pdb.set_trace()
     metrics = trainer.evaluate(eval_dataset = test_set, max_length=args.output_len)
-    # print('after evaluate...')
     trainer.log_metrics("test", metrics)
     trainer.save_metrics("test", metrics)
-    # print('Before debugger.....')
-    # pdb.set_trace()
-    # print('After debugger.....')
     predict_results = trainer.predict(test_dataset=test_set, max_length=args.output_len) 
     if trainer.is_world_process_zero():
         if args.use_generate:
